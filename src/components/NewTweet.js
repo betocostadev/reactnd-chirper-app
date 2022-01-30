@@ -1,54 +1,51 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react'
 import { connect } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { handleAddTweet } from '../store/actions/tweets'
 
-class NewTweet extends Component {
-  state = {
-    text: '',
-  }
+function NewTweet(props) {
+  console.log(props)
+  const [text, setText] = useState('')
+  const navigate = useNavigate()
 
-  handleChange = (e) => {
+  const handleChange = (e) => {
     const text = e.target.value
-    this.setState(() => ({
-      text,
-    }))
+    setText(text)
   }
 
-  handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    const { text } = this.state
-    const { dispatch, id } = this.props
+    const { dispatch, id } = props
 
-    dispatch(handleAddTweet(text, id))
+    await dispatch(handleAddTweet(text, id))
 
-    this.setState(() => ({
-      text: '',
-    }))
+    setText('')
+    if (!id) {
+      navigate('/')
+    }
   }
-  render() {
-    const { text } = this.state
-    const charLeft = 280 - text.length
-    // redirect user after submitting
-    return (
-      <div>
-        <h3 className='center'>Compose new Tweet</h3>
-        <form className='new-tweet' onSubmit={this.handleSubmit}>
-          <textarea
-            placeholder="What's happening?"
-            value={text}
-            onChange={this.handleChange}
-            className='text-area'
-            maxLength={280}
-            rows={4}
-          />
-          {charLeft <= 100 && <div className='tweet-length'>{charLeft}</div>}
-          <button className='btn' type='submit' disabled={text === ''}>
-            Submit
-          </button>
-        </form>
-      </div>
-    )
-  }
+
+  const charLeft = 280 - text.length
+
+  return (
+    <div>
+      <h3 className='center'>Compose new Tweet</h3>
+      <form className='new-tweet' onSubmit={handleSubmit}>
+        <textarea
+          placeholder="What's happening?"
+          value={text}
+          onChange={handleChange}
+          className='text-area'
+          maxLength={280}
+          rows={4}
+        />
+        {charLeft <= 100 && <div className='tweet-length'>{charLeft}</div>}
+        <button className='btn' type='submit' disabled={text === ''}>
+          Submit
+        </button>
+      </form>
+    </div>
+  )
 }
 
 export default connect()(NewTweet)

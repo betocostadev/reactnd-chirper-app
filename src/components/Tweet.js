@@ -1,5 +1,6 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
+import { Link, useNavigate } from 'react-router-dom'
 import { formatTweet, formatDate } from '../utils/helpers'
 import {
   TiArrowBackOutline,
@@ -8,63 +9,72 @@ import {
 } from 'react-icons/ti'
 import { handleToggleLike } from '../store/actions/tweets'
 
-class Tweet extends Component {
-  handleLike = (e) => {
+const Tweet = (props) => {
+  const navigate = useNavigate()
+
+  const handleLike = (e) => {
     e.preventDefault()
-    const { dispatch, tweet, authedUser } = this.props
+    const { dispatch, tweet, authedUser } = props
     dispatch(
       handleToggleLike({ id: tweet.id, hasLiked: tweet.hasLiked, authedUser })
     )
   }
 
-  toParent = (e, id) => {
+  const toParent = (e, id) => {
     e.preventDefault()
-    // Redirect to parent tweet
+    navigate(`/tweet/${id}`)
   }
 
-  render() {
-    const { tweet } = this.props
+  const { tweet } = props
 
-    if (tweet === null) {
-      return <p>This Tweet doens't exists</p>
-    }
+  if (tweet === null) {
+    return <p>This Tweet doesn't exists</p>
+  }
 
-    const { name, avatar, timestamp, text, hasLiked, likes, replies, parent } =
-      tweet
+  const {
+    name,
+    avatar,
+    timestamp,
+    text,
+    hasLiked,
+    likes,
+    replies,
+    id,
+    parent,
+  } = tweet
 
-    return (
-      <div className='tweet'>
-        <img src={avatar} alt={`Avatar of ${name}`} className='avatar' />
-        <div className='tweet-info'>
-          <div>
-            <span>{name}</span>
-            <div>{formatDate(timestamp)}</div>
-            {parent && (
-              <button
-                className='replying-to'
-                onClick={(e) => this.toParent(e, parent.id)}
-              >
-                Replying to @{parent.author}
-              </button>
-            )}
-            <p>{text}</p>
-          </div>
-          <div className='tweet-icons'>
-            <TiArrowBackOutline className='tweet-icon' />
-            <span>{replies !== 0 && replies}</span>
-            <button className='heart-button' onClick={this.handleLike}>
-              {hasLiked === true ? (
-                <TiHeartFullOutline color='#e0245e' className='tweet-icon' />
-              ) : (
-                <TiHeartOutline className='tweet-icon' />
-              )}
+  return (
+    <Link to={`/tweet/${id}`} className='tweet'>
+      <img src={avatar} alt={`Avatar of ${name}`} className='avatar' />
+      <div className='tweet-info'>
+        <div>
+          <span>{name}</span>
+          <div>{formatDate(timestamp)}</div>
+          {parent && (
+            <button
+              className='replying-to'
+              onClick={(e) => toParent(e, parent.id)}
+            >
+              Replying to @{parent.author}
             </button>
-            <span>{likes !== 0 && likes}</span>
-          </div>
+          )}
+          <p>{text}</p>
+        </div>
+        <div className='tweet-icons'>
+          <TiArrowBackOutline className='tweet-icon' />
+          <span>{replies !== 0 && replies}</span>
+          <button className='heart-button' onClick={handleLike}>
+            {hasLiked === true ? (
+              <TiHeartFullOutline color='#e0245e' className='tweet-icon' />
+            ) : (
+              <TiHeartOutline className='tweet-icon' />
+            )}
+          </button>
+          <span>{likes !== 0 && likes}</span>
         </div>
       </div>
-    )
-  }
+    </Link>
+  )
 }
 
 function mapStateToProps({ authedUser, users, tweets }, { id }) {
